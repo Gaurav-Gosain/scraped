@@ -339,8 +339,8 @@ func IsTTY() bool {
 
 // RunWithProgress runs the scraper with a TUI progress display.
 // Falls back to log-based output when no TTY is available.
-func RunWithProgress(ctx context.Context, opts scraper.Options) ([]scraper.Result, error) {
-	if !IsTTY() {
+func RunWithProgress(ctx context.Context, opts scraper.Options, noTUI bool) ([]scraper.Result, error) {
+	if noTUI || !IsTTY() {
 		return runWithLogs(ctx, opts)
 	}
 

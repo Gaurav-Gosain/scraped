@@ -38,6 +38,24 @@ func RenderTerminal(results []scraper.Result, wordWrap int) error {
 	return nil
 }
 
+// WriteRaw writes plain markdown to stdout with no ANSI formatting.
+// Pages are separated by --- with YAML frontmatter containing the URL and source.
+func WriteRaw(results []scraper.Result) error {
+	first := true
+	for _, r := range results {
+		if r.Err != nil {
+			fmt.Fprintf(os.Stderr, "Error scraping %s: %v\n", r.URL, r.Err)
+			continue
+		}
+		if !first {
+			fmt.Println()
+		}
+		fmt.Printf("---\nurl: %s\nsource: %s\n---\n\n%s\n", r.URL, r.Source, r.Markdown)
+		first = false
+	}
+	return nil
+}
+
 // WriteFiles writes each result as a .md file in the given directory.
 func WriteFiles(results []scraper.Result, dir string) error {
 	if err := os.MkdirAll(dir, 0o755); err != nil {

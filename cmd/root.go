@@ -20,6 +20,7 @@ type config struct {
 	WordWrap     int
 	MaxPages     int
 	CrossDomains bool
+	Raw          bool
 }
 
 func NewRootCmd() *cobra.Command {
@@ -53,6 +54,7 @@ func NewRootCmd() *cobra.Command {
 	cmd.Flags().IntVarP(&cfg.WordWrap, "word-wrap", "w", 80, "Word wrap width for terminal rendering")
 	cmd.Flags().IntVarP(&cfg.MaxPages, "max-pages", "m", 0, "Max pages to scrape (0 = unlimited)")
 	cmd.Flags().BoolVar(&cfg.CrossDomains, "cross-domains", false, "Allow crawling across different domains")
+	cmd.Flags().BoolVarP(&cfg.Raw, "raw", "r", false, "Output raw markdown without TUI or ANSI formatting")
 
 	return cmd
 }
@@ -71,13 +73,20 @@ func run(ctx context.Context, cfg *config, args []string) error {
 		CrossDomains: cfg.CrossDomains,
 	}
 
-	results, err := tui.RunWithProgress(ctx, opts)
+	noTUI := cfg.Raw || !stdoutIsTTY()
+
+	results, err := tui.RunWithProgress(ctx, opts, noTUI)
 	if err != nil {
 		return fmt.Errorf("scraping failed: %w", err)
 	}
 
 	if cfg.OutputDir != "" {
 		return output.WriteFiles(results, cfg.OutputDir)
+	}
+
+	// Raw mode or non-TTY stdout: output plain markdown without ANSI.
+	if noTUI {
+		return output.WriteRaw(results)
 	}
 
 	// Count successful results for browser decision.
@@ -94,6 +103,14 @@ func run(ctx context.Context, cfg *config, args []string) error {
 	}
 
 	return output.RenderTerminal(results, cfg.WordWrap)
+}
+
+func stdoutIsTTY() bool {
+	fi, err := os.Stdout.Stat()
+	if err != nil {
+		return false
+	}
+	return fi.Mode()&os.ModeCharDevice != 0
 }
 
 func collectURLs(args []string) []string {
