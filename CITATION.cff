@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+title: scraped
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Gaurav
+    family-names: Gosain
+    email: me@gaurav.zip
+repository-code: 'https://github.com/Gaurav-Gosain/scraped'
+abstract: >-
+  A fast, parallelized CLI tool that scrapes web pages
+  and converts them to beautiful markdown with an
+  interactive TUI browser.
+keywords:
+  - web scraper
+  - markdown
+  - cli
+  - terminal
+  - golang
+  - tui
+license: MIT
