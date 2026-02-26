@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gocolly/colly/v2"
+	"github.com/gocolly/colly/v2/extensions"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/text"
@@ -157,6 +158,9 @@ func Run(ctx context.Context, opts Options) ([]Result, error) {
 	}
 
 	c := colly.NewCollector(collectorOpts...)
+
+	extensions.RandomUserAgent(c)
+	extensions.Referer(c)
 
 	c.SetRequestTimeout(15 * time.Second)
 
